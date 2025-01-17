@@ -1,6 +1,7 @@
 import LoginForm from "../components/auth/LoginForm.tsx";
 import {useEffect} from "react";
 import Cookies from "js-cookie";
+import {Flex} from "antd";
 
 function Auth() {
     useEffect(() => {
@@ -8,8 +9,10 @@ function Auth() {
     }, []);
     return (
         <>
-            Please fill the following form to login.
-            <LoginForm/>
+            <Flex style={{alignItems: "center", justifyContent: "center", flexDirection: "column", height: "100%"}}>
+                <h1>SD Administration</h1>
+                <LoginForm/>
+            </Flex>
         </>
     )
 }

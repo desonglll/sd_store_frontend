@@ -1,7 +1,9 @@
 enum RouteApi {
     login = "/auth/login",
-    index = "/index",
-    tooth = "/bucket/tooth"
+    index = "/",
+    tooth = "/bucket/tooth",
+    toothCategory = "/bucket/toothcategory",
+    analyze = "/analyze"
 }
 
 export default RouteApi

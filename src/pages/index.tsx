@@ -1,8 +1,7 @@
-import {useEffect, useState} from "react";
-import axios from "axios";
-import {Button, Flex, Layout, theme} from 'antd';
+import React, {useEffect, useMemo, useState} from "react";
+import {Button, Flex, Layout, notification, theme} from 'antd';
 import {Route, Routes} from "react-router";
-import SiderNavigation from "../components/navigation/SiderNavigation.tsx";
+import SideNavigation from "../components/navigation/SideNavigation.tsx";
 import {
     MenuFoldOutlined,
     MenuUnfoldOutlined,
@@ -19,17 +18,22 @@ function Index() {
     const {
         token: {colorBgContainer, borderRadiusLG},
     } = theme.useToken();
+    const Context = React.createContext({name: 'Default'});
+
+    const [, contextHolder] = notification.useNotification();
+
+    const contextValue = useMemo(() => ({name: 'Ant Design'}), []);
+
+
     useEffect(() => {
-        axios.get("http://localhost:8000/api/index").then((resp) => {
-            console.log(resp.data);
-        })
     }, []);
     return (
         <>
+
             <Flex style={{height: "100vh"}}>
                 <Layout>
                     <Sider trigger={null} collapsible collapsed={collapsed}>
-                        <SiderNavigation/>
+                        <SideNavigation/>
                     </Sider>
                     <Layout>
                         <Header style={{
@@ -52,21 +56,24 @@ function Index() {
 
                             <AuthButton/>
                         </Header>
-                        <Content
-                            style={{
-                                margin: '24px 16px',
-                                padding: 24,
-                                minHeight: 280,
-                                background: colorBgContainer,
-                                borderRadius: borderRadiusLG,
-                                height: "100%",
-                            }}
-                        >
-                            <Routes>
-                                <Route path={RouteApi.index} element={<Dashboard/>}/>
-                                <Route path={RouteApi.tooth} element={<Tooth/>}/>
-                            </Routes>
-                        </Content>
+                        <Context.Provider value={contextValue}>
+                            {contextHolder}
+                            <Content
+                                style={{
+                                    margin: '24px 16px',
+                                    padding: 24,
+                                    minHeight: 280,
+                                    background: colorBgContainer,
+                                    borderRadius: borderRadiusLG,
+                                    height: "100%",
+                                }}
+                            >
+                                <Routes>
+                                    <Route path={RouteApi.index} element={<Dashboard/>}/>
+                                    <Route path={RouteApi.tooth} element={<Tooth/>}/>
+                                </Routes>
+                            </Content>
+                        </Context.Provider>
                     </Layout>
                 </Layout>
             </Flex>

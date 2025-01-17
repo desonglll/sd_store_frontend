@@ -1,4 +1,4 @@
-import {Button} from "antd";
+import {Button, notification} from "antd";
 import axios from "axios";
 import React from "react";
 import Cookies from "js-cookie";
@@ -15,10 +15,12 @@ const LogoutForm: React.FC = () => {
             }
         }).then((resp) => {
             if (resp.status === 200) {
-                console.log(resp.data)
+                console.log("Logout Successful: ", resp.data)
+                notification.success({message: resp.data})
             }
         }).finally(() => {
             navigate("/")
+            notification.success({message: "hello"})
         })
 
     }

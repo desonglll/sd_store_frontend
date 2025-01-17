@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {Button} from "antd";
+import {Button, notification} from "antd";
 import axios from "axios";
 import Cookies from "js-cookie";
 import Api from "../../config/api.ts";
@@ -21,7 +21,8 @@ const AuthButton: React.FC = () => {
                 }
             }).then((resp) => {
                 if (resp.status === 200) {
-                    console.log(resp.data)
+                    notification.success({message: resp.data})
+                    navigate(RouteApi.login)
                 }
             }).finally(() => {
                 setIsLogged(false)
@@ -41,7 +42,6 @@ const AuthButton: React.FC = () => {
         }).then((resp) => {
             if (resp.status === 200) {
                 setIsLogged(resp.data["is_logged"]);
-                console.log(`is_logged ${resp.data["is_logged"]}`);
                 if (resp.data["is_logged"]) {
                     setStatus("Logout")
                 } else {

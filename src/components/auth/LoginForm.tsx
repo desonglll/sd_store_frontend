@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Button, Checkbox, Form, FormProps, Input} from "antd";
+import {Button, Checkbox, Form, FormProps, Input, notification} from "antd";
 import axios from "axios";
 import Cookies from "js-cookie";
 import {useNavigate} from "react-router";
@@ -30,6 +30,7 @@ const LoginForm: React.FC = () => {
                 if (resp.status === 200) {
                     console.log('Success:', resp.data);
                     navigate(RouteApi.index);
+                    notification.success({message: `Welcome Back! ${resp.data.username}`});
                 }
             })
         }
