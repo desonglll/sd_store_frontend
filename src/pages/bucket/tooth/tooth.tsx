@@ -28,7 +28,6 @@ const Tooth: React.FC = () => {
             }}>Home</a>,
         });
 
-        console.log(breads); // 调试用
         setBreadCrumb(breads);
     }, [location.pathname, navigate]); // location.pathname 变化时重新生成面包屑
 

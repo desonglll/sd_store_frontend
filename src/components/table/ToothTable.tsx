@@ -1,38 +1,16 @@
-import React, {useCallback, useEffect, useState} from "react";
-import axios from "axios";
-import Cookies from "js-cookie";
-import Api from "../../config/api.ts";
-import {Button, notification, Table, TableColumnsType} from "antd";
+import React, {useEffect, useState} from "react";
+import {Checkbox, Table, TableColumnsType} from "antd";
 import {TableRowSelection} from "antd/es/table/interface";
-import {useNavigate} from "react-router";
-import RouteApi from "../../config/route_api.ts";
 
-interface ToothType {
-    id: React.Key;
-    tooth_id: string;
-    name: string;
-    brand: string;
-    category: number;
-    stock_quantity: number;
-    sale_price: string;
-    user: number;
-    available: boolean;
-    color: string;
-    material: string;
-    model: string;
-    length: number;
-    width: number;
-    height: number;
-    weight: number;
-    images: string[];
-    created_at: string;
-    updated_at: string;
-}
+import httpLink from "../../graphql/httplink/httplink.ts";
+import {ApolloClient, InMemoryCache, useQuery} from "@apollo/client";
+import QUERY from "../../graphql/querys/GetTeeth.ts";
+import {ToothType} from "../../types/bucket.ts";
 
 const columns: TableColumnsType<ToothType> = [
     {
         title: 'TOOTH ID',
-        dataIndex: 'tooth_id',
+        dataIndex: 'id',
     },
     {
         title: 'TOOTH NAME',
@@ -44,93 +22,68 @@ const columns: TableColumnsType<ToothType> = [
     },
     {
         title: 'CATEGORY',
-        dataIndex: 'category',
+        dataIndex: 'category_name',
     },
     {
         title: 'STOCK QUANTITY',
-        dataIndex: 'stock_quantity',
+        dataIndex: 'stockQuantity',
     },
     {
         title: 'SALE PRICE',
-        dataIndex: 'sale_price',
+        dataIndex: 'salePrice',
     },
     {
         title: 'USER',
-        dataIndex: 'user',
+        dataIndex: 'user_name',
     },
     {
         title: 'AVAILABLE',
         dataIndex: 'available',
+        render: (available: boolean, item: ToothType) => (
+            <Checkbox onChange={() => {
+            }} checked={available} id={item.id.toString()}></Checkbox>
+        ),
     },
 ];
 
-interface ToothResponseType {
-    count: number;
-    next?: string;
-    previous?: string;
-    limit: number;
-    offset: number;
-    results?: [ToothType]
-}
+
+const uri = httpLink();
+
+const client = new ApolloClient({
+    link: uri,
+    cache: new InMemoryCache(),
+})
 
 const ToothTable: React.FC = () => {
-    const navigate = useNavigate();
-
-    const csrfToken = Cookies.get("csrf-token");
-    const [rawData, setRawData] = useState<ToothResponseType>({
-        count: 0,
-        next: undefined,
-        previous: undefined,
-        limit: 10,
-        offset: 0,
-        results: undefined,
+    const [pagination, setPagination] = useState({
+        current: 1, // 当前页
+        pageSize: 10, // 每页大小
     });
-
+    const {data, loading, error, refetch} = useQuery(QUERY, {
+        client,
+        variables: {
+            limit: pagination.pageSize,
+            offset: (pagination.current - 1) * pagination.pageSize,
+        }
+    })
     // 使用Set来存储所有已选择的记录ID，确保唯一性
     const [selectedRowKeys, setSelectedRowKeys] = useState<Set<React.Key>>(new Set());
+    const [dataSource, setDataSource] = useState<ToothType[]>()
 
-    // 添加当前页的数据缓存
-    const [currentPageData, setCurrentPageData] = useState<ToothType[]>([]);
 
-    const fetchToothData = useCallback((limit: number, offset: number) => {
-        return axios.get(Api.tooth, {
-            withCredentials: true,
-            headers: {"X-CSRFToken": csrfToken},
-            params: {limit, offset},
-        });
-    }, [csrfToken]);
     useEffect(() => {
-        fetchToothData(rawData.limit, rawData.offset).then((resp) => {
-            if (resp.status === 200) {
-                const newData = {
-                    ...resp.data,
-                    results: resp.data.results.map((item: ToothType) => ({
-                        ...item,
-                        key: item.id,
-                    })),
-                };
-                setRawData(newData);
-                setCurrentPageData(newData.results || []);
-            }
-        }).catch((error) => {
-            if (error.status === 403) {
-                notification.info({
-                    message: error.response.data.detail,
-                    description: <>Please login first. <Button type={"primary"} onClick={() => {
-                        navigate(RouteApi.login)
-                    }}>Login</Button></>
-                })
-            }
-        })
-        ;
-    }, [fetchToothData, navigate, rawData.limit, rawData.offset]);
+        if (error) console.log('Error:', error);
+        if (data) {
+            setDataSource(data.allTeeth)
+        }
+    }, [loading, error, data]);
 
     const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
         // 将数组转换为Set以保持选择状态
         const updatedSelection = new Set(selectedRowKeys);
 
         // 获取当前页面上所有记录的ID
-        const currentPageIds = currentPageData.map(item => item.id);
+        const currentPageIds = data.allTeeth.map((item: ToothType) => item.id);
 
         // 找出当前页面上新增的选择
         const newSelections = newSelectedRowKeys.filter(key => !selectedRowKeys.has(key));
@@ -189,19 +142,12 @@ const ToothTable: React.FC = () => {
     };
 
     const handlePaginationChange = (page: number, pageSize: number) => {
-        const offset = (page - 1) * pageSize;
-        fetchToothData(pageSize, offset).then((resp) => {
-            if (resp.status === 200) {
-                const newData = {
-                    ...resp.data,
-                    results: resp.data.results.map((item: ToothType) => ({
-                        ...item,
-                        key: item.id,
-                    })),
-                };
-                setRawData(newData);
-                setCurrentPageData(newData.results || []);
-            }
+        setPagination({current: page, pageSize});
+        refetch({
+            limit: pageSize,
+            offset: (page - 1) * pageSize,
+        }).finally(() => {
+            console.log("Update Table Data!")
         });
     };
 
@@ -209,15 +155,21 @@ const ToothTable: React.FC = () => {
         <>
             <Table<ToothType>
                 rowSelection={rowSelection}
+                dataSource={dataSource?.map((item) => ({
+                    ...item,
+                    key: item.id,
+                    category_name: item.category.name,
+                    user_name: item.user.username
+                })) || []}
                 columns={columns}
-                dataSource={rawData.results?.map((item) => ({...item, key: item.id})) || []}
                 style={{height: "100%"}}
                 pagination={{
-                    total: rawData.count,
-                    current: rawData.offset / rawData.limit + 1,
-                    pageSize: rawData.limit,
-                    onChange: (page, pageSize) => handlePaginationChange(page, pageSize),
+                    current: pagination.current,
+                    pageSize: pagination.pageSize,
+                    total: data?.count || 0, // 根据返回的总记录数调整
+                    onChange: handlePaginationChange,
                 }}
+                loading={loading}
             />
         </>
     );

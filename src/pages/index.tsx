@@ -2,10 +2,7 @@ import React, {useEffect, useMemo, useState} from "react";
 import {Button, Flex, Layout, notification, theme} from 'antd';
 import {Route, Routes} from "react-router";
 import SideNavigation from "../components/navigation/SideNavigation.tsx";
-import {
-    MenuFoldOutlined,
-    MenuUnfoldOutlined,
-} from '@ant-design/icons';
+import {MenuFoldOutlined, MenuUnfoldOutlined,} from '@ant-design/icons';
 import Dashboard from "../components/dashboard/Dashboard.tsx";
 import Tooth from "./bucket/tooth/tooth.tsx";
 import AuthButton from "../components/auth/AuthButton.tsx";
