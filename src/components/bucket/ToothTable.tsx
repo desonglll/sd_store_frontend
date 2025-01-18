@@ -1,11 +1,15 @@
 import React, {useEffect, useState} from "react";
-import {Checkbox, Table, TableColumnsType} from "antd";
+import {Button, Checkbox, Flex, GetProps, Input, Table, TableColumnsType} from "antd";
 import {TableRowSelection} from "antd/es/table/interface";
 
 import httpLink from "../../graphql/httplink/httplink.ts";
 import {ApolloClient, InMemoryCache, useQuery} from "@apollo/client";
-import QUERY from "../../graphql/querys/GetTeeth.ts";
 import {ToothType} from "../../types/bucket.ts";
+import {GetTeeth} from "../../graphql/querys/GetTeeth.graphql";
+
+type SearchProps = GetProps<typeof Input.Search>;
+
+const {Search} = Input;
 
 const columns: TableColumnsType<ToothType> = [
     {
@@ -59,17 +63,19 @@ const ToothTable: React.FC = () => {
         current: 1, // 当前页
         pageSize: 10, // 每页大小
     });
-    const {data, loading, error, refetch} = useQuery(QUERY, {
+    // 使用Set来存储所有已选择的记录ID，确保唯一性
+    const [selectedRowKeys, setSelectedRowKeys] = useState<Set<React.Key>>(new Set());
+    const [dataSource, setDataSource] = useState<ToothType[]>()
+    const [searchValue, setSearchValue] = useState<string>(''); // 保存当前的搜索条件
+
+    const {data, loading, error, refetch} = useQuery(GetTeeth, {
         client,
         variables: {
             limit: pagination.pageSize,
             offset: (pagination.current - 1) * pagination.pageSize,
+            search: searchValue, // 传递搜索条件
         }
     })
-    // 使用Set来存储所有已选择的记录ID，确保唯一性
-    const [selectedRowKeys, setSelectedRowKeys] = useState<Set<React.Key>>(new Set());
-    const [dataSource, setDataSource] = useState<ToothType[]>()
-
 
     useEffect(() => {
         if (error) console.log('Error:', error);
@@ -146,31 +152,56 @@ const ToothTable: React.FC = () => {
         refetch({
             limit: pageSize,
             offset: (page - 1) * pageSize,
+            search: searchValue, // 传递当前搜索条件
         }).finally(() => {
             console.log("Update Table Data!")
+        });
+    };
+    const onSearch: SearchProps['onSearch'] = (value) => {
+        console.log("search", value)
+        setSearchValue(value); // 更新搜索条件
+        refetch({
+            limit: pagination.pageSize,
+            offset: (pagination.current - 1) * pagination.pageSize,
+            search: value, // 将搜索值传递给 GraphQL 查询
+        }).then((resp) => {
+            console.log("Table Data Updated!");
+            console.log(resp.data)
+        }).catch(err => {
+            console.error("Error in refetching data:", err);
         });
     };
 
     return (
         <>
-            <Table<ToothType>
-                rowSelection={rowSelection}
-                dataSource={dataSource?.map((item) => ({
-                    ...item,
-                    key: item.id,
-                    category_name: item.category.name,
-                    user_name: item.user.username
-                })) || []}
-                columns={columns}
-                style={{height: "100%"}}
-                pagination={{
-                    current: pagination.current,
-                    pageSize: pagination.pageSize,
-                    total: data?.count || 0, // 根据返回的总记录数调整
-                    onChange: handlePaginationChange,
-                }}
-                loading={loading}
-            />
+            <Flex style={{flexDirection: 'column'}}>
+                <div style={{alignSelf: 'flex-end', marginBottom: 20}}>
+                    <Button>Create</Button>
+                    <Search
+                        placeholder="input search text"
+                        onSearch={onSearch}
+                        style={{width: 200}}
+                    />
+                </div>
+                <Table<ToothType>
+                    rowSelection={rowSelection}
+                    dataSource={dataSource?.map((item) => ({
+                        ...item,
+                        key: item.id,
+                        category_name: item.category.name,
+                        user_name: item.user.username
+                    })) || []}
+                    columns={columns}
+                    style={{height: "100%"}}
+                    pagination={{
+                        current: pagination.current,
+                        pageSize: pagination.pageSize,
+                        total: data?.count || 0, // 根据返回的总记录数调整
+                        onChange: handlePaginationChange,
+                    }}
+                    loading={loading}
+                />
+            </Flex>
         </>
     );
 };

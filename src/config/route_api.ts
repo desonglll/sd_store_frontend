@@ -1,8 +1,10 @@
 enum RouteApi {
     login = "/auth/login",
     index = "/",
-    tooth = "/bucket/tooth",
-    toothCategory = "/bucket/toothcategory",
+    bucket = "/bucket",
+    tooth = "/tooth",
+    toothCreate = "/tooth/create",
+    toothCategory = "/toothCategory",
     analyze = "/analyze"
 }
 

@@ -1,8 +1,8 @@
 import {ApolloClient, InMemoryCache, useQuery,} from '@apollo/client';
 import {useEffect} from "react";
 import httpLink from "../graphql/httplink/httplink.ts";
-import QUERY from "../graphql/querys/GetTeeth.ts";
 import {ToothType} from "../types/bucket.ts";
+import {GetTeeth} from "../graphql/querys/GetTeeth.graphql"
 
 const uri = httpLink("http://localhost:8000/graphql");
 
@@ -12,7 +12,7 @@ const client = new ApolloClient({
 });
 
 function ApolloClientTest() {
-    const {data, loading, error} = useQuery(QUERY, {
+    const {data, loading, error} = useQuery(GetTeeth, {
         client,
         variables: {
             limit: 10,

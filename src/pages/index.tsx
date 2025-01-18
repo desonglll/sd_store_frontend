@@ -4,7 +4,7 @@ import {Route, Routes} from "react-router";
 import SideNavigation from "../components/navigation/SideNavigation.tsx";
 import {MenuFoldOutlined, MenuUnfoldOutlined,} from '@ant-design/icons';
 import Dashboard from "../components/dashboard/Dashboard.tsx";
-import Tooth from "./bucket/tooth/tooth.tsx";
+import Bucket from "./bucket/bucket.tsx";
 import AuthButton from "../components/auth/AuthButton.tsx";
 import RouteApi from "../config/route_api.ts";
 
@@ -50,7 +50,6 @@ function Index() {
                                     height: 64,
                                 }}
                             />
-
                             <AuthButton/>
                         </Header>
                         <Context.Provider value={contextValue}>
@@ -67,7 +66,7 @@ function Index() {
                             >
                                 <Routes>
                                     <Route path={RouteApi.index} element={<Dashboard/>}/>
-                                    <Route path={RouteApi.tooth} element={<Tooth/>}/>
+                                    <Route path={RouteApi.bucket + '/*'} element={<Bucket/>}/>
                                 </Routes>
                             </Content>
                         </Context.Provider>

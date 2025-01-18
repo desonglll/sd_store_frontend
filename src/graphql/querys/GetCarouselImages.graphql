@@ -1,0 +1,8 @@
+query GetCarouselImages{
+    allCarouselImages{
+        id
+        name
+        url
+        available
+    }
+}

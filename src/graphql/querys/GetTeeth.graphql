@@ -1,0 +1,34 @@
+# src/graphql/queries/GetTeeth.graphql
+query GetTeeth($limit: Int!, $offset: Int!, $search: String) {
+    allTeeth(limit: $limit, offset: $offset, search: $search) {
+        id
+        name
+        model
+        brand
+        color
+        material
+        length
+        width
+        weight
+        height
+        salePrice
+        stockQuantity
+        available
+        createdAt
+        updatedAt
+        category {
+            code
+            name
+            available
+            user {
+                id
+                username
+            }
+        }
+        user {
+            id
+            username
+        }
+    }
+    count(search: $search)
+}

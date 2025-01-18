@@ -22,13 +22,18 @@ const items: MenuItem[] = [
         label: 'Bucket',
         children: [
             {
-                label: "Tooth",
-                key: RouteApi.tooth,
+                label: "BucketOverview",
+                key: RouteApi.bucket,
                 icon: <RocketOutlined/>
             },
             {
-                label: "Tooth Category",
-                key: RouteApi.toothCategory,
+                label: "Tooth",
+                key: RouteApi.bucket + RouteApi.tooth,
+                icon: <RocketOutlined/>
+            },
+            {
+                label: "Bucket Category",
+                key: RouteApi.bucket + RouteApi.toothCategory,
                 icon: <OrderedListOutlined/>
             }
         ]
@@ -52,7 +57,7 @@ const SideNavigation: React.FC = () => {
             <div className="demo-logo-vertical"/>
             <Menu
                 theme="dark"
-                mode="inline"
+                mode="vertical"
                 selectedKeys={[current]} // 使用 selectedKeys 动态更新选中项
                 items={items}
                 onClick={onClick}

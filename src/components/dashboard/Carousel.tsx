@@ -2,9 +2,8 @@ import React, {useEffect, useState} from "react";
 import {Carousel as AntCarousel} from "antd";
 import httpLink from "../../graphql/httplink/httplink.ts";
 import {ApolloClient, InMemoryCache, useQuery} from "@apollo/client";
-import QUERY from "../../graphql/querys/GetCarouselImages.ts";
 import {CarouselImageType} from "../../types/carousel.ts";
-
+import {GetCarouselImages} from "../../graphql/querys/GetCarouselImages.graphql"
 
 const uri = httpLink();
 
@@ -13,9 +12,8 @@ const client = new ApolloClient({
     cache: new InMemoryCache(),
 })
 
-
 function Carousel() {
-    const {data, loading, error} = useQuery(QUERY, {
+    const {data, loading, error} = useQuery(GetCarouselImages, {
         client,
     })
     const [carouselImages, setCarouselImages] = useState<CarouselImageType[]>([])
@@ -29,7 +27,6 @@ function Carousel() {
         width: '100%',
         objectFit: 'cover',
     };
-
 
     useEffect(() => {
         if (loading) console.log('Loading...');
